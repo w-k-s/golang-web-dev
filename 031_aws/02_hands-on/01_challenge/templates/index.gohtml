@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf8"/>
+		<title>Your Profile</title>
+	</head>
+	<body>
+		{{if .User}}
+			<h1>Welcome back, {{ .User.FirstName }} {{ .User.LastName}}</h1>
+			<a href="/logout">Logout</a>
+		{{end}}
+	</body>
+</html>

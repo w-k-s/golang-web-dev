@@ -25,12 +25,12 @@ func main() {
 }
 
 func handle(conn net.Conn) {
+	defer conn.Close()
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		ln := scanner.Text()
 		fmt.Println(ln)
 	}
-	defer conn.Close()
 
 	// we never get here
 	// we have an open stream connection

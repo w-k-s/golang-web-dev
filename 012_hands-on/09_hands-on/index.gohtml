@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Hands On # 9</title>
+	</head>
+	<body>
+		<table>
+		<tr>
+			<th>Date</th>
+			<th>High</th>
+			<th>Low</th>
+		</tr>
+		{{range .}}
+		<tr>
+			<td>{{.Date}}</td>
+			<td>{{.High}}</td>
+			<td>{{.Low}}</td>
+		</tr>
+		{{end}}
+		</table>
+	</body>
+</html>

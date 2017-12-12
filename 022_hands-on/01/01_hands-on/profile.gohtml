@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+	<head lang="en">
+		<meta charset="utf8">
+		<title>Profile</title>
+	</head>
+	<body>
+		{{if .}}
+			<p>My name is {{.Name}} and i'm feeling {{.Mood}}.</p>
+		{{else}}
+			<h1>Profile Not Found</h1>
+		{{end}}
+	</body>
+</html>
