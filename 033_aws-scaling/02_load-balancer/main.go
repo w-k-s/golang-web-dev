@@ -10,6 +10,7 @@ func main() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/ping", ping)
 	http.HandleFunc("/instance", instance)
+	http.Handle("/favicon.ico",http.NotFoundHandler())
 	http.ListenAndServe(":80", nil)
 }
 

@@ -6,7 +6,19 @@
 </head>
 <body>
 
-Hello from index
+	<p>Session Cookie Value: {{.SessionId}}</p>
+	<div>
+		<h3>Your pictures</h3>
+		<div>
+		{{range .UploadedImages}}
+			<img src="./picture/{{.}}" width="200px" height="200px"/>
+		{{end}}
+		</div>
+	</div>
 
+	<form method="post" action="/" enctype="multipart/form-data">
+		<input type="file" name="image"/>
+		<input type="submit" value="Submit"/>
+	</form>
 </body>
 </html>

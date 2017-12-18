@@ -46,6 +46,10 @@ builds/**/images/*
 #*.png
 #*.jpeg
 
+# Stuff that probably gets added while I'm testing but I'd be really
+# embarassed if it ended up on my public github
+034_photo-blog/01_starting/public/
+
 # security / ssl
 *.pem
 *.xxjson
