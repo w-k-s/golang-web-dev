@@ -3,39 +3,55 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/GoesToEleven/golang-web-dev/040_mongodb/06_hands-on/starting-code/models"
+	"github.com/waqqas-abdulkareem/golangwebdev/042_mongodb/06_hands-on/starting-code/models"
 	"github.com/julienschmidt/httprouter"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/satori/go.uuid"
 	"net/http"
+	"os"
 )
 
 type UserController struct {
-	session *mgo.Session
+	db map[string]*models.User
 }
 
-func NewUserController(s *mgo.Session) *UserController {
-	return &UserController{s}
+func NewUserController(db map[string]*models.User) *UserController {
+	uc := &UserController{db}
+	uc.readDB()
+	return uc
+}
+
+func (uc UserController) writeDB(){
+
+	f, err := os.Create("db.json")
+	if err != nil{
+		panic(err)
+	}
+	defer f.Close()
+
+	err = json.NewEncoder(f).Encode(&uc.db)
+	if err != nil{
+		panic(err)
+	}
+}
+
+func (uc UserController) readDB(){
+	f, err := os.Open("db.json")
+	if err != nil{
+		return
+	}
+	err = json.NewDecoder(f).Decode(&uc.db)
+	if err != nil{
+		panic(err)
+	}
 }
 
 func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Grab id
 	id := p.ByName("id")
 
-	// Verify id is ObjectId hex representation, otherwise return status not found
-	if !bson.IsObjectIdHex(id) {
-		w.WriteHeader(http.StatusNotFound) // 404
-		return
-	}
-
-	// ObjectIdHex returns an ObjectId from the provided hex representation.
-	oid := bson.ObjectIdHex(id)
-
-	// composite literal
-	u := models.User{}
-
 	// Fetch user
-	if err := uc.session.DB("go-web-dev-db").C("users").FindId(oid).One(&u); err != nil {
+	u,ok := uc.db[id]
+	if !ok {
 		w.WriteHeader(404)
 		return
 	}
@@ -46,6 +62,7 @@ func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request, p httpr
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK) // 200
 	fmt.Fprintf(w, "%s\n", uj)
+
 }
 
 func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -54,34 +71,28 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request, _ ht
 	json.NewDecoder(r.Body).Decode(&u)
 
 	// create bson ID
-	u.Id = bson.NewObjectId()
+	u.Id = uuid.NewV4().String()
 
 	// store the user in mongodb
-	uc.session.DB("go-web-dev-db").C("users").Insert(u)
+	uc.db[u.Id] = &u;
 
 	uj, _ := json.Marshal(u)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated) // 201
 	fmt.Fprintf(w, "%s\n", uj)
+
+	uc.writeDB()
 }
 
 func (uc UserController) DeleteUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	id := p.ByName("id")
 
-	if !bson.IsObjectIdHex(id) {
-		w.WriteHeader(404)
-		return
-	}
-
-	oid := bson.ObjectIdHex(id)
-
 	// Delete user
-	if err := uc.session.DB("go-web-dev-db").C("users").RemoveId(oid); err != nil {
-		w.WriteHeader(404)
-		return
-	}
+	delete(uc.db,id)
 
 	w.WriteHeader(http.StatusOK) // 200
-	fmt.Fprint(w, "Deleted user", oid, "\n")
+	fmt.Fprint(w, "Deleted user", id, "\n")
+
+	uc.writeDB()
 }
